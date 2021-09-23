@@ -1,0 +1,62 @@
+---
+- name: Assignment 5
+  hosts: all
+  become: yes
+  vars:
+    administrator_name: corpadmin
+  tasks:
+    - name: import variables
+      include_vars:
+        file: ./userfile.yml
+        name: vardata
+    - name: Update all current software packages on the system
+      yum:
+        name: '*'
+        state: latest
+    - name: Create admin user
+      user:
+        
+        name={{administrator_name}}
+        password={{vardata.passwad}}
+
+- name: assignment 5 web1play
+  hosts: web1
+  become: yes
+  tasks:
+    - name: install nginx
+      yum:
+        name: nginx
+        state: installed
+      
+    - name: start nginx
+      service:
+        name: nginx
+        enabled: yes
+    - name: start nginx on boot
+      service:
+        name: nginx
+        state: started
+    - name: copy default.conf.j2
+      template: src=default.conf.j2 dest=/etc/nginx/conf.d/default.conf
+
+
+- name: assignment 5 database1 play
+  hosts: database1
+  become: yes
+  tasks:
+    - name: install mysql server
+      yum:
+        name: mysql-server
+        state: installed
+    - name: start mysqlserver
+      service:
+        name: mysqld     
+        enabled: yes
+    - name: start mysqlserver at boot
+      service:
+        name: mysqld
+        state: started
+    - name: create 5 directories
+      file: dest=var/data/client{{ item }} state=directory
+      with_sequence: start=1 end=5
+
